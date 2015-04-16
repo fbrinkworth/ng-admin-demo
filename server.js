@@ -1,3 +1,33 @@
+var express = require('express');
+var app = express();
+
+var options = {
+  dotfiles: 'ignore',
+  etag: false,
+  extensions: ['htm', 'html', 'css', 'js'],
+  index: "index.html",
+  maxAge: '1d',
+  redirect: false,
+  setHeaders: function (res, path, stat) {
+    res.set('x-timestamp', Date.now());
+  }
+};
+
+app.use(express.static('public', options));
+
+
+
+var server = app.listen(3000, function () {
+
+  var host = server.address().address;
+  var port = server.address().port;
+
+  console.log('listening at http://%s:%s', host, port);
+
+});
+
+/*
+
 var server = require('json-server');
 
 server.low.db = {
@@ -173,3 +203,4 @@ server.low.db = {
 };
 
 server.listen(3000);
+*/

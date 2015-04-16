@@ -12,6 +12,7 @@
 
     app.config(function (NgAdminConfigurationProvider, RestangularProvider) {
         var nga = NgAdminConfigurationProvider;
+        var fireRootUrl = 'https://shining-torch-2515.firebaseio.com';
 
         function truncate(value) {
             if (!value) {
@@ -21,6 +22,9 @@
             return value.length > 50 ? value.substr(0, 50) + '...' : value;
         }
 
+        // need for firebase
+        //RestangularProvider.setBaseUrl('https://shining-torch-2515.firebaseio.com');
+        //RestangularProvider.setRequestSuffix('.json');      
         // use the custom query parameters function to format the API request correctly
         RestangularProvider.addFullRequestInterceptor(function(element, operation, what, url, headers, params) {
             if (operation == "getList") {
@@ -47,19 +51,48 @@
             return { params: params };
         });
 
-        var admin = nga.application('ng-admin backend demo') // application main title
-            .baseApiUrl('http://ng-admin.marmelab.com:8000/'); // main API endpoint
+        var admin = nga.application('ng-admin backend demo'); // application main title
+            //.baseApiUrl(''); // main API endpoint
+            //.baseApiUrl('https://shining-torch-2515.firebaseio.com'); // main API endpoint
 
         // define all entities at the top to allow references between them
         var post = nga.entity('posts'); // the API endpoint for posts will be http://localhost:3000/posts/:id
 
+        var post = nga.entity('posts').url(function(view, entityId) {
+            var url = fireRootUrl + '/posts.json';
+            if (entityId) {
+                url = fireRootUrl + '/posts/' + entityId + '.json';
+            }
+            return url;
+        });
+
+        var comment = nga.entity('comments').url(function(view, entityId) {
+            var url = fireRootUrl + '/comments.json';
+            if (entityId) {
+                url = fireRootUrl + '/comments/' + entityId + '.json';
+            }
+            return url;
+        });
+
+        var tag = nga.entity('tags').url(function(view, entityId) {
+            var url = fireRootUrl + '/tags.json';
+            if (entityId) {
+                url = fireRootUrl + '/tags/' + entityId + '.json';
+            }
+            return url;
+        });
+      
+/*
         var comment = nga.entity('comments')
-            .baseApiUrl('http://ng-admin.marmelab.com:8000/') // The base API endpoint can be customized by entity
             .identifier(nga.field('id')); // you can optionally customize the identifier used in the api ('id' by default)
+            //.baseApiUrl('https://shining-torch-2515.firebaseio.com/') // The base API endpoint can be customized by entity
+            //.identifier(nga.field('id')); // you can optionally customize the identifier used in the api ('id' by default)
 
         var tag = nga.entity('tags')
             .readOnly(); // a readOnly entity has disabled creation, edition, and deletion views
 
+*/
+      
         // set the application entities
         admin
             .addEntity(post)
@@ -291,6 +324,7 @@
         // notification is the service used to display notifications on the top of the screen
         this.notification = notification;
     };
+  
     sendPostController.prototype.sendEmail = function() {
         if (this.email) {
             this.notification.log('Email successfully sent to ' + this.email, {addnCls: 'humane-flatty-success'});
@@ -298,6 +332,7 @@
             this.notification.log('Email is undefined', {addnCls: 'humane-flatty-error'});
         }
     }
+    
     sendPostController.inject = ['$stateParams', 'notification'];
 
     var sendPostControllerTemplate =
@@ -332,6 +367,7 @@
                 '<p class="lead">You can add custom pages, too</p>' +
             '</div>' +
         '</div></div>';
+  
     app.config(function ($stateProvider) {
         $stateProvider.state('stats', {
             parent: 'main',
